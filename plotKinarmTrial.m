@@ -27,8 +27,8 @@ subplot(2,3,[1 4]); hold on
 rectangle('Position',[startXY-startR startR*2],'Curvature',[1 1]);
 rectangle('Position',[targetXY-targetR targetR*2],'Curvature',curv);
 % plot hand and gaze trajectory
-pg = plot(xyGaze(:,1),xyGaze(:,2),'.-','LineWidth',1,'MarkerSize',15);
 ph = plot(xyHand(:,1),xyHand(:,2),'-','LineWidth',2);
+pg = plot(xyGaze(:,1),xyGaze(:,2),'.-','LineWidth',1,'MarkerSize',15);
 % axes and labels
 hold off
 axis equal
