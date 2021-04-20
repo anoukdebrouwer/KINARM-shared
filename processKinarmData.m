@@ -14,19 +14,20 @@ function processKinarmData(projectPath,combineSameBlocks,plotTrials)
 % Perform custom processing by calling customKinarmTrialProcessing.m.
 % Save data in struct E (experiment info), D (data aligned to target
 %   appearance) and C (custom variables) in folder 2_ProcessedData.
-% 
+%
 % processKinarmData(projectPath) allows to define the path with the data of
 %   the Kinarm project.
-% 
+%
 % processKinarmData(projectPath,combineSameBlocks) combines blocks of the
-%   same task into a single data file if combineSameBlocks=true 
+%   same task into a single data file if combineSameBlocks=true
 %   (default=true).
 %
-% processKinarmData(projectPath,combineSameBlocks,plotTrials) creates a 
+% processKinarmData(projectPath,combineSameBlocks,plotTrials) creates a
 %   plot with the hand and gaze data for each trial if plotTrials=true
 %   (default=false).
 %
 % This code was written for Miriam Spering's lab at UBC Vancouver, BC Canada.
+% The original code was written in Matlab R2015b on Mac OS X 10.14.6.
 
 % MIT License
 % Copyright (c) 2021 Anouk de Brouwer
@@ -374,16 +375,13 @@ for s = 1 : nSubj
             
             %% HAND DATA - get position, velocity, and acceleration
             
-            % get hand position and remove any 'spikes' in the data
+            % get hand position and remove any 'spikes' in the data (smoothing)
             xyHand_raw = [T.Right_HandX(tTarget_ms:tEnd_ms) T.Right_HandY(tTarget_ms:tEnd_ms)];
             xyHand = medfilt1(xyHand_raw,3); % remove spikes (third-order median filtering)
-            d_medfilt = abs(xyHand-xyHand_raw);
-            if max(d_medfilt(:)>0.001) % check if any spikes were removed
-                plot([xyHand_raw,xyHand]); disp('Removed spike'); keyboard
-            end
             
             % get hand velocity
-            vxyHand = [T.Right_HandXVel(tTarget_ms:tEnd_ms) T.Right_HandYVel(tTarget_ms:tEnd_ms)];
+            vxyHand_raw = [T.Right_HandXVel(tTarget_ms:tEnd_ms) T.Right_HandYVel(tTarget_ms:tEnd_ms)];
+            vxyHand = medfilt1(vxyHand_raw,3); % remove spikes (third-order median filtering)
             
             % get and filter hand acceleration
             [bbutter,abutter] = butter(2,50/(fs/2)); % 2nd order 50 Hz low-pass butterworth filter
@@ -560,7 +558,7 @@ for s = 1 : nSubj
         
         % save info about experiment to E struct
         if taskBlockNo(b)==1 % save once
-            E.subj = subjFolders(s).name;
+            E.subjectID = subjFolders(s).name;
             E.trialSpecs = trialSpecs;
             E.accessories = expInfo.accessories;
             E.eventDefinitions = expInfo.event_definitions;
