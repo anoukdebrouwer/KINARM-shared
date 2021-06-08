@@ -534,7 +534,7 @@ for s = 1 : nSubj
             % plot hand trajectories
             if exist('D_error','var')
                 % plot error trials
-                cellfun(@(x,y) plot(x,y,'Color','r'),...
+                cellfun(@(x,y) plot(x,y,'Color',[0.7 0.7 0.7]),...
                     D_error.xHand(:,c),D_error.yHand(:,c));
                 % plot valid trials
                 cellfun(@(x,y) plot(x,y,'Color',colors(1,:),'LineWidth',1),...
@@ -551,8 +551,58 @@ for s = 1 : nSubj
         end
         suplabel('X (m)','x');
         suplabel('Y (m)','y');
-        suplabel(figName,'t');
+        suplabel(['Hand trajectories - ' figName],'t');
         saveFigAsPDF([saveFigsToPath 'handTrajectories_' figName],12)
+        if plotTrials
+            keyboard
+        end
+        
+        %% PLOT - plot gaze trajectories for each trial type
+        
+        if expInfo.calibration.GAZE_CALIBRATED == 1
+            
+            figure(fig2); clf
+            for c = 1 : nCurrTypes
+                subplot(ceil(sqrt(nCurrTypes)),ceil(sqrt(nCurrTypes)),c);
+                hold on
+                % plot start position
+                startXY = [trialSpecs.xStart(c) trialSpecs.yStart(c)];
+                startR = [trialSpecs.targetRadius(c) trialSpecs.targetRadius(c)];
+                rectangle('Position',[startXY-startR startR*2]/100,'Curvature',[1 1]);
+                % plot target position
+                if strcmp(trialSpecs.targetShape(c),'circle')
+                    targetR = [trialSpecs.targetRadius(c) trialSpecs.targetRadius(c)];
+                    curv = [1 1];
+                else
+                    targetR = 0.5*[trialSpecs.targetWidth(c) trialSpecs.targetHeight(c)];
+                    curv = [0 0];
+                end
+                targetXY = [trialSpecs.xTarget(c) trialSpecs.yTarget(c)];
+                rectangle('Position',[targetXY-targetR targetR*2]/100,'Curvature',curv)
+                % plot gaze trajectories
+                if exist('D_error','var')
+                    % plot error trials
+                    cellfun(@(x,y) plot(x,y,'Color',[0.7 0.7 0.7]),...
+                        D_error.xGaze(:,c),D_error.yGaze(:,c));
+                    % plot valid trials
+                    cellfun(@(x,y) plot(x,y,'Color',colors(2,:),'LineWidth',1),...
+                        D_good.xGaze(:,c),D_good.yGaze(:,c));
+                else
+                    % plot all trials
+                    cellfun(@(x,y) plot(x,y,'Color',colors(2,:)),...
+                        D_block.xGaze(:,c),D_block.yGaze(:,c));
+                end
+                % axes and title
+                axis equal
+                set(gca,'xtick',-0.5:0.1:0.5); set(gca,'ytick',0:0.1:0.5);
+                title(['Type ' num2str(D_block.trialType(1,c))])
+            end
+            suplabel('X (m)','x');
+            suplabel('Y (m)','y');
+            suplabel(['Gaze trajectories - ' figName],'t');
+            saveFigAsPDF([saveFigsToPath 'gazeTrajectories_' figName],12)
+            
+        end
         
         %% SAVE - save block data in struct
         
